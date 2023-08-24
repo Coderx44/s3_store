@@ -40,9 +40,9 @@ func NewMinIOAPI(credential MinIOCredentials, bucketName string, signedURLExp ti
 	}, nil
 }
 
-func (api *MinIOAPI) GetPreSignedPutUrl(ctx context.Context, objectName string, expiry time.Duration) (string, error) {
+func (api *MinIOAPI) GetPreSignedPutUrl(ctx context.Context, objectName string) (string, error) {
 
-	presignedURL, err := api.Client.PresignedPutObject(ctx, api.BucketName, objectName, expiry)
+	presignedURL, err := api.Client.PresignedPutObject(ctx, api.BucketName, objectName, api.SignedURLExp)
 	if err != nil {
 		log.Printf("Error generating presigned URL: %v", err)
 		return "", err
@@ -50,7 +50,11 @@ func (api *MinIOAPI) GetPreSignedPutUrl(ctx context.Context, objectName string, 
 	return presignedURL.String(), nil
 }
 
-func (api *MinIOAPI) GetPreSignedGetUrl(ctx context.Context, objectName string, expiry time.Duration) (string, error) {
-	// presignedUrl, err := api.Client.PresignedGetObject(ctx, api.BucketName, objectName, expiry)
-	return "", nil
+func (api *MinIOAPI) GetPreSignedGetUrl(ctx context.Context, objectName string) (string, error) {
+	presignedUrl, err := api.Client.PresignedGetObject(ctx, api.BucketName, objectName, api.SignedURLExp, nil)
+	if err != nil {
+		log.Printf("Error generating presigned URL: %v", err)
+		return "", err
+	}
+	return presignedUrl.String(), nil
 }

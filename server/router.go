@@ -10,7 +10,8 @@ import (
 func InitRouter(deps Dependencies) (router *mux.Router) {
 	router = mux.NewRouter()
 
-	router.HandleFunc("/get-signed-url", services.GetPreSignedPutUrl(deps.StoreService)).Methods(http.MethodGet)
+	router.HandleFunc("/put-presigned-url", services.GetPreSignedPutUrl(deps.StoreService)).Methods(http.MethodGet)
+	router.HandleFunc("/get-presigned-url", services.GetPreSignedGetUrl(deps.StoreService)).Methods(http.MethodGet)
 	return
 
 }
