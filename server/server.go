@@ -6,17 +6,26 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Coderx44/s3_store/bootstrap"
 	"github.com/Coderx44/s3_store/storage"
 )
 
 func StartApp() (err error) {
+	env := bootstrap.NewEnv()
+
+	// credentials := storage.MinIOCredentials{
+	// 	Endpoint:        "192.168.1.117:9000",
+	// 	AccessKeyID:     "JSw7V41myXOrgWHr5MHl",
+	// 	SecretAccessKey: "dlqxBh8cMDIx8R3Lzye3DSjEgC9CRBtgxDqYjkrY",
+	// }
+
 	credentials := storage.MinIOCredentials{
-		Endpoint:        "192.168.1.117:9000",
-		AccessKeyID:     "JSw7V41myXOrgWHr5MHl",
-		SecretAccessKey: "dlqxBh8cMDIx8R3Lzye3DSjEgC9CRBtgxDqYjkrY",
+		Endpoint:        env.CloudEndpoint,
+		AccessKeyID:     env.CloudAccessKey,
+		SecretAccessKey: env.CloudSecretKey,
 	}
-	bucketName := "newbucket"
-	signedURLExp := 1 * time.Hour // Set the expiration time for the signed URL
+	bucketName := env.CloudBucketName
+	signedURLExp := time.Duration(env.SignedUrlExpiryMinute) * time.Minute
 
 	client, err := storage.NewMinIOAPI(credentials, bucketName, signedURLExp)
 	if err != nil {
@@ -25,8 +34,8 @@ func StartApp() (err error) {
 	}
 	deps := initDependencies(client)
 	router := InitRouter(deps)
-	fmt.Println("Server started on :8080")
+	fmt.Printf("Server started on :%s", env.AppPort)
 	http.Handle("/", router)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(fmt.Sprintf(":%s", env.AppPort), nil)
 	return
 }
